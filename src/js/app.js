@@ -31,7 +31,9 @@
             cat4: '',
             geography: '',
             theme: ''
-        }
+        },
+        map: null,
+        markers: []
     };
 
     // ============================================
@@ -491,6 +493,11 @@
         renderPartners();
         updateActiveFilters();
         updateStats();
+
+        // Update map if in map view
+        if (state.currentView === 'map' && state.map) {
+            updateMapMarkers();
+        }
     }
 
     function matchesCategory(value, filter) {
@@ -732,6 +739,7 @@
         state.currentView = view;
         const grid = document.getElementById('partnersGrid');
         const list = document.getElementById('partnersList');
+        const map = document.getElementById('partnersMap');
         const buttons = document.querySelectorAll('.view-btn');
 
         buttons.forEach(btn => {
@@ -739,16 +747,25 @@
             btn.setAttribute('aria-selected', 'false');
         });
 
+        // Remove active class from all views
+        grid.classList.remove('active');
+        list.classList.remove('active');
+        map.classList.remove('active');
+
         if (view === 'grid') {
             grid.classList.add('active');
-            list.classList.remove('active');
             buttons[0].classList.add('active');
             buttons[0].setAttribute('aria-selected', 'true');
-        } else {
-            grid.classList.remove('active');
+        } else if (view === 'list') {
             list.classList.add('active');
             buttons[1].classList.add('active');
             buttons[1].setAttribute('aria-selected', 'true');
+        } else if (view === 'map') {
+            map.classList.add('active');
+            buttons[2].classList.add('active');
+            buttons[2].setAttribute('aria-selected', 'true');
+            initializeMap();
+            updateMapMarkers();
         }
     }
 
@@ -983,6 +1000,126 @@
         });
 
         applyFilters();
+    }
+
+    // ============================================
+    // Map View Functions
+    // ============================================
+    function initializeMap() {
+        if (state.map) return; // Already initialized
+
+        const container = document.getElementById('mapContainer');
+        if (!container) return;
+
+        // Initialize map centered on Seattle
+        state.map = L.map('mapContainer').setView([47.6062, -122.3321], 12);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(state.map);
+
+        // Fix map size issues
+        setTimeout(() => {
+            state.map.invalidateSize();
+        }, 100);
+    }
+
+    function updateMapMarkers() {
+        if (!state.map) return;
+
+        // Clear existing markers
+        state.markers.forEach(marker => marker.remove());
+        state.markers = [];
+
+        // Add markers for filtered partners
+        state.filteredPartners.forEach(partner => {
+            const coords = geocodeAddress(partner['Address']);
+            if (coords) {
+                const marker = L.marker(coords)
+                    .addTo(state.map)
+                    .bindPopup(createMarkerPopup(partner));
+
+                marker.on('click', () => {
+                    showPartnerDetails(partner);
+                });
+
+                state.markers.push(marker);
+            }
+        });
+
+        // Fit map to show all markers
+        if (state.markers.length > 0) {
+            const group = L.featureGroup(state.markers);
+            state.map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+
+    function geocodeAddress(address) {
+        if (!address || address === 'Not available on website' || address === 'Information not available on website') {
+            return null;
+        }
+
+        // Simple geocoding based on known Seattle addresses
+        // This is a hardcoded mapping - in production, you'd use a geocoding API
+        const knownLocations = {
+            '509 Olive Way, Suite 500, Seattle, WA 98101-2556': [47.6142, -122.3356],
+            '3639 Martin Luther King Jr. Way S, Seattle, WA 98144': [47.5797, -122.2908],
+            '2103 S. Atlantic St., Seattle, WA 98144': [47.5794, -122.2915],
+            '3715 S Hudson St, Suite #111 (Lower Level), Seattle, WA 98118': [47.5345, -122.2698],
+            '8323 Rainier Ave S, Suite A, Seattle, WA 98118': [47.5235, -122.2695],
+            '7728 Rainier Avenue South, Seattle, WA 98118': [47.5207, -122.2692],
+            '611 S Lane St, Seattle, WA 98104': [47.5970, -122.3232],
+            '4000 Aurora Ave N Suite 123, Seattle, WA 98103': [47.6515, -122.3472],
+            '600 4th Avenue, 4th Floor, Seattle, WA 98104': [47.6042, -122.3296],
+            '810 3rd Avenue, Suite 750, Seattle, WA 98104-1627': [47.6062, -122.3321],
+            '700 5th Ave, Suite 1700, Seattle, WA 98104': [47.6059, -122.3301],
+            '1200 12th Ave S, Suite 710, Mailbox #14, Seattle, WA 98144': [47.5970, -122.3176],
+            '3407 NE 2nd St, Renton, WA 98056': [47.4857, -122.1928],
+            '21428 44th Avenue, Seattle, WA': [47.7249, -122.2966],
+            '2524 16th Ave S, Seattle, WA 98144': [47.5786, -122.3120],
+            '1200 12th Ave S, Suite 830, Seattle, WA 98144': [47.5970, -122.3176],
+            '8815 Seward Park Ave. S, Seattle, WA 98118': [47.5214, -122.2571],
+            '2100 24th Ave S, Suite 360, Seattle, WA 98144-4646': [47.5794, -122.2976],
+            '3715 S Hudson St, Suite 103, Seattle, WA 98118': [47.5345, -122.2698],
+            '4008 Martin Luther King, Jr. Way South, Seattle, WA 98108': [47.5638, -122.2908],
+            '1500 Harvard Avenue, Seattle, WA 98122': [47.6172, -122.3211],
+            '2445 3rd Ave. S, Seattle, WA 98134': [47.5814, -122.3302],
+            '3820 S Ferdinand St #201A, Seattle, WA 98118': [47.5341, -122.2683],
+            '3250 Airport Way S Suite 742, Seattle, WA 98134': [47.5759, -122.3154],
+            '3722 S Hudson St, Seattle, WA 98118': [47.5345, -122.2698],
+            '1000 Fourth Ave., Seattle, WA 98104-1109': [47.6066, -122.3343],
+            '5623 Rainier Ave S, Seattle, WA 98118': [47.5466, -122.2695],
+            '6930 Martin Luther King Jr. Way S, Seattle, WA 98118': [47.5392, -122.2908],
+            '1225 South Weller Street, Suite 510, Seattle, WA 98144': [47.5969, -122.3176],
+            '9013 Martin Luther King Jr Way S, Seattle, WA 98118': [47.5194, -122.2908]
+        };
+
+        return knownLocations[address] || null;
+    }
+
+    function createMarkerPopup(partner) {
+        const mission = partner['Mission/Summary'].replace(/^"(.*)"$/, '$1').substring(0, 150) + '...';
+        return `
+            <div style="max-width: 250px;">
+                <h3 style="margin: 0 0 8px 0; color: var(--primary); font-size: 1rem;">
+                    ${escapeHtml(partner['Organization Name'])}
+                </h3>
+                <p style="margin: 5px 0; font-size: 0.85rem;">
+                    <strong>Address:</strong><br>
+                    ${escapeHtml(partner['Address'] || 'Not available')}
+                </p>
+                <p style="margin: 5px 0; font-size: 0.85rem;">
+                    ${escapeHtml(mission)}
+                </p>
+                <p style="margin: 8px 0 0 0;">
+                    <a href="#" onclick="event.preventDefault();" style="color: var(--secondary); font-size: 0.85rem;">
+                        Click marker for details
+                    </a>
+                </p>
+            </div>
+        `;
     }
 
     // ============================================
