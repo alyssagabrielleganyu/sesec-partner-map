@@ -67,7 +67,7 @@ body {
     position: absolute;
     top: 20px;
     left: 20px;
-    height: 0.039px;
+    height: 30px;
     width: auto;
     opacity: 0.3;
     filter: brightness(0) invert(1);
@@ -781,7 +781,7 @@ body {
     }
 
     .header-logo {
-        height: 0.033px;
+        height: 25px;
         top: 15px;
         left: 15px;
     }
@@ -840,7 +840,7 @@ body {
 
 @media (max-width: 480px) {
     .header-logo {
-        height: 0.028px;
+        height: 20px;
         top: 12px;
         left: 12px;
     }
