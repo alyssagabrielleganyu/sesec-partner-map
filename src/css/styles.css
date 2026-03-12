@@ -73,10 +73,11 @@ body {
 }
 
 .header-subtitle {
-    font-size: clamp(1rem, 2vw, 1.1rem);
+    font-size: clamp(1.1rem, 2vw, 1.25rem);
     opacity: 0.95;
     max-width: 800px;
     line-height: 1.6;
+    font-weight: 500;
 }
 
 .stats {
@@ -84,7 +85,7 @@ body {
     gap: 20px;
     flex-wrap: wrap;
     position: relative;
-    padding-left: 180px;
+    padding-left: 100px;
 }
 
 .stats-logo {
@@ -92,7 +93,7 @@ body {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    height: 120px;
+    height: 60px;
     width: auto;
     opacity: 0.15;
     filter: brightness(0) invert(1);
@@ -789,11 +790,11 @@ body {
     }
 
     .stats {
-        padding-left: 140px;
+        padding-left: 80px;
     }
 
     .stats-logo {
-        height: 90px;
+        height: 50px;
     }
 
     .partners-grid {
