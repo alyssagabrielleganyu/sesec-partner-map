@@ -1,0 +1,29 @@
+{
+  "name": "sesec-partner-map",
+  "version": "1.0.0",
+  "description": "Interactive map of 57+ partner organizations serving Southeast Seattle's education ecosystem",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "npx http-server -p 8000",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_USERNAME/sesec-partner-map.git"
+  },
+  "keywords": [
+    "education",
+    "seattle",
+    "partners",
+    "community",
+    "nonprofit",
+    "sesec"
+  ],
+  "author": "Southeast Seattle Education Coalition",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/sesec-partner-map/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/sesec-partner-map#readme"
+}

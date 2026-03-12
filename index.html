@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive map of 57+ partner organizations serving Southeast Seattle's education ecosystem. Search, filter, and connect with partners.">
+    <meta name="keywords" content="SESEC, Southeast Seattle, education, partners, community organizations, resources">
+    <meta name="author" content="Southeast Seattle Education Coalition">
+
+    <title>SESEC Partner Map | Southeast Seattle Education Coalition</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="src/css/styles.css">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SESEC Partner Map">
+    <meta property="og:description" content="Explore 57+ organizations serving Southeast Seattle students and families">
+    <meta property="og:url" content="https://sesecwa.org/partner-map">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SESEC Partner Map">
+    <meta name="twitter:description" content="Interactive directory of Southeast Seattle education partners">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="header-title">🗺️ SESEC Partner Map</h1>
+                <p class="header-subtitle">Explore 57+ organizations serving Southeast Seattle's education ecosystem. Search, filter, and connect with partners supporting students and families across the region.</p>
+            </div>
+
+            <div class="stats" id="statsContainer">
+                <div class="stat">
+                    <span class="stat-number" id="totalPartners">57</span>
+                    <span class="stat-label">Partner Organizations</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="filteredCount">57</span>
+                    <span class="stat-label">Showing Now</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">22</span>
+                    <span class="stat-label">Public Schools Served</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Search and Filters -->
+            <section class="controls" role="search">
+                <div class="search-box">
+                    <span class="search-icon" aria-hidden="true">🔍</span>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search organizations by name, mission, services, communities served..."
+                        aria-label="Search partners"
+                    >
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="filterCat1">Category 1: Integrated Student Support</label>
+                        <select id="filterCat1" aria-label="Filter by Integrated Student Support">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterCat2">Category 2: Expanded Learning</label>
+                        <select id="filterCat2" aria-label="Filter by Expanded Learning">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterCat3">Category 3: Family & Community</label>
+                        <select id="filterCat3" aria-label="Filter by Family & Community Engagement">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterCat4">Category 4: Collaborative Leadership</label>
+                        <select id="filterCat4" aria-label="Filter by Collaborative Leadership">
+                            <option value="">All</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterGeo">Geographic Area</label>
+                        <select id="filterGeo" multiple aria-label="Filter by Geographic Area" size="1">
+                            <option value="">All Areas</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterTheme">Additional Themes</label>
+                        <select id="filterTheme" multiple aria-label="Filter by Theme" size="1">
+                            <option value="">All Themes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="active-filters" id="activeFilters" role="status" aria-live="polite"></div>
+            </section>
+
+            <!-- Results Info -->
+            <section class="results-info">
+                <div class="results-count" id="resultsCount" role="status" aria-live="polite">
+                    Showing 57 partners
+                </div>
+                <div class="view-toggle" role="tablist">
+                    <button
+                        class="view-btn active"
+                        onclick="window.partnerMap.switchView('grid')"
+                        role="tab"
+                        aria-selected="true"
+                        aria-controls="partnersGrid"
+                    >
+                        📊 Grid
+                    </button>
+                    <button
+                        class="view-btn"
+                        onclick="window.partnerMap.switchView('list')"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="partnersList"
+                    >
+                        📋 List
+                    </button>
+                </div>
+            </section>
+
+            <!-- Partners Grid -->
+            <section class="partners-grid active" id="partnersGrid" role="tabpanel"></section>
+
+            <!-- Partners List -->
+            <section class="partners-list" id="partnersList" role="tabpanel"></section>
+
+            <!-- No Results -->
+            <section class="no-results" id="noResults" style="display: none;" role="status">
+                <h3>No partners found</h3>
+                <p>Try adjusting your search or filters</p>
+            </section>
+
+            <!-- Loading State -->
+            <section class="loading" id="loadingState">
+                <div class="spinner"></div>
+                <p>Loading partner data...</p>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About SESEC</h3>
+                    <p>Southeast Seattle Education Coalition brings together 50+ partner organizations serving 22 public schools in Southeast Seattle.</p>
+                    <a href="https://www.sesecwa.org" target="_blank" rel="noopener">Visit SESEC Website →</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="https://www.sesecwa.org/partners/" target="_blank" rel="noopener">All Partners</a></li>
+                        <li><a href="https://www.sesecwa.org/about/" target="_blank" rel="noopener">About Us</a></li>
+                        <li><a href="https://www.sesecwa.org/contact/" target="_blank" rel="noopener">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Partner Map</h3>
+                    <p class="footer-meta">Last Updated: March 2026</p>
+                    <p class="footer-meta">Version 1.0</p>
+                    <p class="footer-meta">57 Organizations Mapped</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Southeast Seattle Education Coalition. Data compiled through partner research.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="partnerModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button
+                    class="modal-close"
+                    onclick="window.partnerMap.closeModal()"
+                    aria-label="Close modal"
+                >
+                    ×
+                </button>
+                <h2 id="modalTitle"></h2>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="src/js/app.js"></script>
+</body>
+</html>
