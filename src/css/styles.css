@@ -452,34 +452,50 @@ body {
     margin-bottom: 40px;
 }
 
-.leaflet-popup-content {
-    font-family: inherit;
+/* Google Maps InfoWindow Styling */
+.gm-style .gm-style-iw-c {
+    border-radius: var(--radius);
+    padding: 0;
 }
 
-.leaflet-popup-content h3 {
+.gm-style .gm-style-iw-d {
+    overflow: auto !important;
+    max-height: 300px;
+}
+
+.map-info-window {
+    padding: 15px;
+    font-family: inherit;
+    max-width: 300px;
+}
+
+.map-info-window h3 {
     color: var(--primary);
     font-size: 1.1rem;
     margin: 0 0 10px 0;
+    font-weight: 700;
 }
 
-.leaflet-popup-content p {
+.map-info-window p {
     margin: 5px 0;
     font-size: 0.9rem;
     line-height: 1.5;
+    color: var(--text);
 }
 
-.leaflet-popup-content strong {
+.map-info-window strong {
     color: var(--text);
     font-weight: 600;
 }
 
-.leaflet-popup-content a {
+.map-info-window a {
     color: var(--secondary);
     text-decoration: none;
     transition: var(--transition);
+    font-weight: 500;
 }
 
-.leaflet-popup-content a:hover {
+.map-info-window a:hover {
     color: var(--primary);
     text-decoration: underline;
 }

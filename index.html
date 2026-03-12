@@ -15,9 +15,6 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="src/css/styles.css">
 
-    <!-- Leaflet CSS for Map View -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="SESEC Partner Map">
@@ -234,7 +231,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Google Maps JavaScript API -->
+    <!-- IMPORTANT: Replace YOUR_API_KEY with your actual Google Maps API key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=Function.prototype" async defer></script>
     <script src="src/js/geocode-data.js"></script>
     <script src="src/js/app.js"></script>
 </body>
