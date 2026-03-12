@@ -1013,12 +1013,12 @@
     }
 
     // ============================================
-    // Map View Functions (Google Maps)
+    // Map View Functions
     // ============================================
     function initializeMap() {
         if (state.map) {
-            // Map already exists, just trigger resize
-            google.maps.event.trigger(state.map, 'resize');
+            // Map already exists, just refresh it
+            state.map.invalidateSize();
             return;
         }
 
@@ -1028,113 +1028,60 @@
             return;
         }
 
-        // Check if Google Maps is loaded
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-            console.error('Google Maps library not loaded. Please add your API key to index.html');
-            // Show error message to user
-            container.innerHTML = `
-                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; padding: 40px; text-align: center;">
-                    <div>
-                        <h3 style="color: var(--danger); margin-bottom: 10px;">⚠️ Google Maps API Key Required</h3>
-                        <p style="color: var(--text-muted);">Please add your Google Maps API key to index.html to enable map view.</p>
-                        <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">
-                            Get API Key →
-                        </a>
-                    </div>
-                </div>
-            `;
+        // Check if Leaflet is loaded
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library not loaded');
             return;
         }
 
         try {
-            // Initialize Google Map centered on Seattle
-            state.map = new google.maps.Map(container, {
-                center: { lat: 47.6062, lng: -122.3321 },
-                zoom: 12,
-                mapTypeControl: true,
-                mapTypeControlOptions: {
-                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-                    position: google.maps.ControlPosition.TOP_RIGHT
-                },
-                streetViewControl: true,
-                fullscreenControl: true,
-                zoomControl: true,
-                styles: [
-                    {
-                        featureType: "poi.business",
-                        stylers: [{ visibility: "off" }]
-                    }
-                ]
-            });
+            // Initialize map centered on Seattle
+            state.map = L.map('mapContainer').setView([47.6062, -122.3321], 12);
 
-            console.log('Google Maps initialized successfully');
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(state.map);
+
+            // Fix map size issues
+            setTimeout(() => {
+                if (state.map) {
+                    state.map.invalidateSize();
+                }
+            }, 200);
         } catch (error) {
-            console.error('Error initializing Google Maps:', error);
+            console.error('Error initializing map:', error);
         }
     }
 
     function updateMapMarkers() {
-        if (!state.map || typeof google === 'undefined') {
-            console.log('Map not initialized or Google Maps not loaded');
+        if (!state.map) {
+            console.log('Map not initialized');
             return;
         }
 
         console.log(`Updating map with ${state.filteredPartners.length} partners`);
 
         // Clear existing markers
-        state.markers.forEach(marker => marker.setMap(null));
+        state.markers.forEach(marker => marker.remove());
         state.markers = [];
 
-        // Create bounds to fit all markers
-        const bounds = new google.maps.LatLngBounds();
-        let markersAdded = 0;
-
         // Add markers for filtered partners
+        let markersAdded = 0;
         state.filteredPartners.forEach(partner => {
             const coords = geocodeAddress(partner);
             if (coords) {
-                const position = { lat: coords[0], lng: coords[1] };
+                const marker = L.marker(coords)
+                    .addTo(state.map)
+                    .bindPopup(createMarkerPopup(partner));
 
-                // Create custom marker with SESEC colors
-                const marker = new google.maps.Marker({
-                    position: position,
-                    map: state.map,
-                    title: partner['Organization Name'],
-                    animation: google.maps.Animation.DROP,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 8,
-                        fillColor: '#ea6a47', // SESEC orange
-                        fillOpacity: 1,
-                        strokeColor: '#0f2942', // SESEC dark blue
-                        strokeWeight: 2
-                    }
+                // Click marker to show full partner details in modal
+                marker.on('click', () => {
+                    showPartnerDetails(partner);
                 });
-
-                // Create info window
-                const infoWindow = new google.maps.InfoWindow({
-                    content: createMarkerPopup(partner)
-                });
-
-                // Click marker to show info window
-                marker.addListener('click', () => {
-                    // Close any open info windows
-                    state.markers.forEach(m => {
-                        if (m.infoWindow) m.infoWindow.close();
-                    });
-                    infoWindow.open(state.map, marker);
-
-                    // Also show full details in modal after a short delay
-                    setTimeout(() => {
-                        showPartnerDetails(partner);
-                    }, 300);
-                });
-
-                // Store info window reference
-                marker.infoWindow = infoWindow;
 
                 state.markers.push(marker);
-                bounds.extend(position);
                 markersAdded++;
             }
         });
@@ -1142,16 +1089,12 @@
         console.log(`Added ${markersAdded} markers to map`);
 
         // Fit map to show all markers
-        if (markersAdded > 0) {
-            state.map.fitBounds(bounds);
-            // Don't zoom in too much for single marker
-            if (markersAdded === 1) {
-                state.map.setZoom(Math.min(state.map.getZoom(), 15));
-            }
+        if (state.markers.length > 0) {
+            const group = L.featureGroup(state.markers);
+            state.map.fitBounds(group.getBounds().pad(0.1));
         } else {
             // Default to Seattle if no markers
-            state.map.setCenter({ lat: 47.6062, lng: -122.3321 });
-            state.map.setZoom(12);
+            state.map.setView([47.6062, -122.3321], 12);
         }
     }
 
@@ -1169,37 +1112,23 @@
     }
 
     function createMarkerPopup(partner) {
-        const mission = partner['Mission/Summary'].replace(/^"(.*)"$/, '$1').substring(0, 120) + '...';
-        const categories = [];
-        if (partner['Category 1: Integrated Student Support'] === 'Yes') categories.push('Integrated Support');
-        if (partner['Category 2: Expanded Learning & Cultural Relevance'] === 'Yes') categories.push('Expanded Learning');
-        if (partner['Category 3: Family & Community Engagement'] === 'Yes') categories.push('Family & Community');
-        if (partner['Category 4: Collaborative Leadership'] === 'Yes') categories.push('Collaborative Leadership');
-
+        const mission = partner['Mission/Summary'].replace(/^"(.*)"$/, '$1').substring(0, 150) + '...';
         return `
-            <div class="map-info-window">
-                <h3>${escapeHtml(partner['Organization Name'])}</h3>
-                ${categories.length > 0 ? `
-                    <p style="margin: 8px 0; font-size: 0.8rem; color: #ea6a47;">
-                        <strong>Categories:</strong> ${categories.join(', ')}
-                    </p>
-                ` : ''}
-                <p style="margin: 8px 0;">
+            <div style="max-width: 250px;">
+                <h3 style="margin: 0 0 8px 0; color: var(--primary); font-size: 1rem;">
+                    ${escapeHtml(partner['Organization Name'])}
+                </h3>
+                <p style="margin: 5px 0; font-size: 0.85rem;">
                     <strong>Address:</strong><br>
                     ${escapeHtml(partner['Address'] || 'Not available')}
                 </p>
-                ${partner['Phone'] ? `
-                    <p style="margin: 5px 0;">
-                        <strong>Phone:</strong> ${escapeHtml(partner['Phone'])}
-                    </p>
-                ` : ''}
-                <p style="margin: 8px 0; color: #64748b; font-size: 0.85rem;">
+                <p style="margin: 5px 0; font-size: 0.85rem;">
                     ${escapeHtml(mission)}
                 </p>
-                <p style="margin: 10px 0 0 0; text-align: center;">
-                    <span style="color: #0f2942; font-size: 0.85rem; font-weight: 600;">
-                        Click marker for full details →
-                    </span>
+                <p style="margin: 8px 0 0 0;">
+                    <a href="#" onclick="event.preventDefault();" style="color: var(--secondary); font-size: 0.85rem;">
+                        Click marker for details
+                    </a>
                 </p>
             </div>
         `;

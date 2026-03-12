@@ -10,8 +10,7 @@ Interactive web application for exploring 57+ partner organizations serving Sout
 
 - 🔍 **Smart Search** - Real-time search across organizations, missions, services, and communities
 - 🎯 **Advanced Filtering** - Filter by 4 service categories, geography, and themes
-- 📊 **Three View Modes** - Toggle between grid cards, list view, and interactive map
-- 🗺️ **Interactive Map** - Google Maps integration with custom markers and partner details
+- 📊 **Dual View Modes** - Toggle between grid cards and list view
 - 📱 **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
 - ♿ **Accessible** - WCAG compliant with keyboard navigation and screen reader support
 - ⚡ **Fast & Lightweight** - Pure vanilla JavaScript, no frameworks required
@@ -41,46 +40,6 @@ npx http-server
 ```
 
 Then visit: http://localhost:8000
-
----
-
-## Google Maps Setup
-
-The map view requires a Google Maps API key. Follow these steps:
-
-### 1. Get Your API Key
-
-1. Visit [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project
-3. Enable "Maps JavaScript API"
-4. Create credentials → API Key
-5. Copy your API key (looks like: `AIzaSyB...`)
-
-### 2. Add API Key to Your Site
-
-Open `index.html` and replace `YOUR_API_KEY` on line 236:
-
-```html
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_ACTUAL_KEY&callback=Function.prototype" async defer></script>
-```
-
-### 3. Restrict Your Key (Important!)
-
-In Google Cloud Console:
-- Add HTTP referrers: `https://your-site.netlify.app/*` and `http://localhost:8000/*`
-- Restrict to "Maps JavaScript API" only
-
-### Free Tier
-
-Google Maps offers **$200/month free credit**:
-- **28,000+ map loads per month** (plenty for SESEC's use case)
-- For a nonprofit site like SESEC with moderate traffic, you'll stay within the free tier
-
-📖 **Full Guide:** See [GOOGLE_MAPS_SETUP.md](./GOOGLE_MAPS_SETUP.md) for detailed instructions
-
-### Alternative: Leaflet (No API Key Required)
-
-If you prefer to avoid Google Maps entirely, you can use the free OpenStreetMap with Leaflet library. See the guide for instructions on reverting.
 
 ---
 
@@ -121,20 +80,18 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
 
 ```
 sesec-partner-map/
-├── index.html                # Main application file
+├── index.html          # Main application file
 ├── data/
-│   └── partners.csv          # Partner data (57 organizations)
+│   └── partners.csv    # Partner data (57 organizations)
 ├── src/
 │   ├── css/
-│   │   └── styles.css        # Application styles
+│   │   └── styles.css  # Application styles
 │   └── js/
-│       ├── app.js            # Application logic
-│       └── geocode-data.js   # Partner coordinates for map view
-├── docs/                     # Documentation
-├── README.md                 # This file
-├── DEPLOYMENT.md             # Deployment guide
-├── GOOGLE_MAPS_SETUP.md      # Google Maps API setup guide
-└── .gitignore               # Git ignore rules
+│       └── app.js      # Application logic
+├── docs/               # Documentation
+├── README.md           # This file
+├── DEPLOYMENT.md       # Deployment guide
+└── .gitignore         # Git ignore rules
 ```
 
 ---
@@ -170,7 +127,7 @@ Partner data is stored in `data/partners.csv` with the following columns:
 - [ ] Partner self-service portal
 
 ### Phase 2: Advanced Features
-- [x] ~~Geographic map view~~ ✅ Complete (Google Maps integration)
+- [ ] Geographic map view
 - [ ] Partnership recommendation engine
 - [ ] Referral tracking system
 - [ ] Multi-language support
@@ -183,7 +140,6 @@ See [ROADMAP.md](./docs/ROADMAP.md) for complete development plan.
 ## Technology Stack
 
 - **Frontend:** Pure HTML5, CSS3, JavaScript (ES6+)
-- **Maps:** Google Maps JavaScript API
 - **Data:** CSV file (future: REST API + PostgreSQL)
 - **Hosting:** Static site (Netlify, Vercel, GitHub Pages)
 - **Future Backend:** Node.js/Python + FastAPI
