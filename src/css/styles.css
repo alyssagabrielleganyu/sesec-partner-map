@@ -437,11 +437,11 @@ body {
 
 /* Map View */
 .partners-map {
-    display: none;
+    display: none !important;
 }
 
 .partners-map.active {
-    display: block;
+    display: block !important;
 }
 
 #mapContainer {
