@@ -61,14 +61,14 @@ body {
     padding: 40px 20px;
     box-shadow: var(--shadow-lg);
     position: relative;
-    min-height: 340px;
+    min-height: 310px;
 }
 
 .header-logo {
     position: absolute;
     top: 20px;
     left: 20px;
-    height: 300px;
+    height: 270px;
     width: auto;
     opacity: 1;
     z-index: 1;
@@ -782,11 +782,11 @@ body {
 @media (max-width: 768px) {
     .header {
         padding: 30px 20px;
-        min-height: 285px;
+        min-height: 260px;
     }
 
     .header-logo {
-        height: 250px;
+        height: 225px;
         top: 15px;
         left: 15px;
     }
@@ -845,11 +845,11 @@ body {
 
 @media (max-width: 480px) {
     .header {
-        min-height: 232px;
+        min-height: 212px;
     }
 
     .header-logo {
-        height: 200px;
+        height: 180px;
         top: 12px;
         left: 12px;
     }
