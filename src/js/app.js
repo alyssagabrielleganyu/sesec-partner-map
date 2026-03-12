@@ -736,11 +736,14 @@
     // View Switching
     // ============================================
     function switchView(view) {
+        console.log('Switching to view:', view);
         state.currentView = view;
         const grid = document.getElementById('partnersGrid');
         const list = document.getElementById('partnersList');
-        const map = document.getElementById('partnersMap');
+        const mapView = document.getElementById('partnersMap');
         const buttons = document.querySelectorAll('.view-btn');
+
+        console.log('Elements found:', { grid: !!grid, list: !!list, mapView: !!mapView });
 
         buttons.forEach(btn => {
             btn.classList.remove('active');
@@ -748,24 +751,31 @@
         });
 
         // Remove active class from all views
-        grid.classList.remove('active');
-        list.classList.remove('active');
-        map.classList.remove('active');
+        if (grid) grid.classList.remove('active');
+        if (list) list.classList.remove('active');
+        if (mapView) mapView.classList.remove('active');
 
         if (view === 'grid') {
-            grid.classList.add('active');
+            if (grid) grid.classList.add('active');
             buttons[0].classList.add('active');
             buttons[0].setAttribute('aria-selected', 'true');
         } else if (view === 'list') {
-            list.classList.add('active');
+            if (list) list.classList.add('active');
             buttons[1].classList.add('active');
             buttons[1].setAttribute('aria-selected', 'true');
         } else if (view === 'map') {
-            map.classList.add('active');
+            if (mapView) {
+                mapView.classList.add('active');
+                console.log('Map view activated');
+            }
             buttons[2].classList.add('active');
             buttons[2].setAttribute('aria-selected', 'true');
-            initializeMap();
-            updateMapMarkers();
+            // Delay map initialization to ensure container is visible
+            setTimeout(() => {
+                console.log('Initializing map...');
+                initializeMap();
+                updateMapMarkers();
+            }, 150);
         }
     }
 
@@ -1006,24 +1016,43 @@
     // Map View Functions
     // ============================================
     function initializeMap() {
-        if (state.map) return; // Already initialized
+        if (state.map) {
+            // Map already exists, just refresh it
+            state.map.invalidateSize();
+            return;
+        }
 
         const container = document.getElementById('mapContainer');
-        if (!container) return;
+        if (!container) {
+            console.error('Map container not found');
+            return;
+        }
 
-        // Initialize map centered on Seattle
-        state.map = L.map('mapContainer').setView([47.6062, -122.3321], 12);
+        // Check if Leaflet is loaded
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library not loaded');
+            return;
+        }
 
-        // Add OpenStreetMap tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(state.map);
+        try {
+            // Initialize map centered on Seattle
+            state.map = L.map('mapContainer').setView([47.6062, -122.3321], 12);
 
-        // Fix map size issues
-        setTimeout(() => {
-            state.map.invalidateSize();
-        }, 100);
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(state.map);
+
+            // Fix map size issues
+            setTimeout(() => {
+                if (state.map) {
+                    state.map.invalidateSize();
+                }
+            }, 200);
+        } catch (error) {
+            console.error('Error initializing map:', error);
+        }
     }
 
     function updateMapMarkers() {
